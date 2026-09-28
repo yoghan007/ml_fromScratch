@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning from Scratch — Interactive Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="brand">
+                <div class="logo-icon">⚡</div>
+                <div>
+                    <h1>ML from Scratch <span class="badge">Engine</span></h1>
+                    <p class="subtitle">Interactive Vectorized Linear & Logistic Regression Playground</p>
+                </div>
+            </div>
+            <div class="mode-tabs">
+                <button id="tab-linear" class="tab-btn active" onclick="switchMode('linear')">📈 Linear Regression</button>
+                <button id="tab-logistic" class="tab-btn" onclick="switchMode('logistic')">🎯 Logistic Regression</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Left Panel: Interactive Canvas -->
+            <section class="card canvas-section">
+                <div class="card-header">
+                    <h2 id="canvas-title">Data Points Canvas (Linear Regression)</h2>
+                    <span class="instruction-pill" id="canvas-instruction">Click on canvas to add data points</span>
+                </div>
+                
+                <div class="canvas-wrapper">
+                    <canvas id="mainCanvas" width="700" height="480"></canvas>
+                    <div id="canvasOverlay" class="canvas-overlay"></div>
+                </div>
+
+                <div class="canvas-actions">
+                    <button class="btn btn-secondary" onclick="generateRandomData()">🎲 Random Data</button>
+                    <button class="btn btn-danger" onclick="clearCanvas()">🗑️ Clear Points</button>
+                    <span class="sample-count" id="sampleCount">0 Data Points</span>
+                </div>
+            </section>
+
+            <!-- Right Panel: Hyperparameters & Model Controls -->
+            <section class="card controls-section">
+                <div class="card-header">
+                    <h2>Hyperparameters & Controls</h2>
+                </div>
+
+                <div class="control-group">
+                    <label for="learningRate">Learning Rate (&alpha;): <span id="lrVal" class="val-badge">0.05</span></label>
+                    <input type="range" id="learningRate" min="0.001" max="0.3" step="0.005" value="0.05" oninput="updateVal('lrVal', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label for="maxEpochs">Epochs / Iterations: <span id="epochsVal" class="val-badge">500</span></label>
+                    <input type="range" id="maxEpochs" min="50" max="2000" step="50" value="500" oninput="updateVal('epochsVal', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label for="l2Reg">L2 Regularization (&lambda;₂): <span id="l2Val" class="val-badge">0.00</span></label>
+                    <input type="range" id="l2Reg" min="0" max="0.5" step="0.01" value="0" oninput="updateVal('l2Val', this.value)">
+                </div>
+
+                <div class="control-group" id="solverGroup">
+                    <label for="solverSelect">Optimization Solver:</label>
+                    <select id="solverSelect" class="select-input">
+                        <option value="gradient_descent">Gradient Descent (Iterative)</option>
+                        <option value="normal_equation">Normal Equation (Closed-form)</option>
+                    </select>
+                </div>
+
+                <div class="control-group" id="thresholdGroup" style="display: none;">
+                    <label for="decisionThreshold">Decision Threshold: <span id="threshVal" class="val-badge">0.50</span></label>
+                    <input type="range" id="decisionThreshold" min="0.1" max="0.9" step="0.05" value="0.5" oninput="updateVal('threshVal', this.value)">
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="trainModel()">🚀 Train Model</button>
+                    <button class="btn btn-accent" onclick="stepGD()">⏯️ Step GD (1 Ep)</button>
+                </div>
+
+                <hr class="divider">
+
+                <!-- Metrics Dashboard -->
+                <div class="metrics-dashboard">
+                    <h3>Learned Model Parameters</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-label">Weight (w₁)</span>
+                            <span id="metricWeight" class="metric-val">0.0000</span>
+                        </div>
+                        <div class="metric-card" id="weight2Card" style="display: none;">
+                            <span class="metric-label">Weight (w₂)</span>
+                            <span id="metricWeight2" class="metric-val">0.0000</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Bias (b)</span>
+                            <span id="metricBias" class="metric-val">0.0000</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label" id="lossLabel">Cost Loss J</span>
+                            <span id="metricCost" class="metric-val">0.0000</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label" id="scoreLabel">Score (R²)</span>
+                            <span id="metricScore" class="metric-val">0.0000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loss Curve Canvas -->
+                <div class="loss-chart-container">
+                    <div class="chart-header">
+                        <span>Cost Function Decay J(&theta;)</span>
+                    </div>
+                    <canvas id="lossCanvas" width="340" height="120"></canvas>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Built with Pure Vectorized Math & JavaScript Canvas • Machine Learning from Scratch</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
